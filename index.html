@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ReFood Astana | Surplus Food Exchange</title>
+<meta name="description" content="ReFood Astana connects food donors with nearby recipients and helps reduce edible food waste." />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg:#f4f7f2;
+  --surface:#fff;
+  --ink:#17241d;
+  --muted:#6b7a70;
+  --line:#e4ebe3;
+  --green:#1d8a58;
+  --green-dark:#11643e;
+  --green-soft:#e8f5ed;
+  --mint:#c9edda;
+  --orange:#d98a35;
+  --red:#c44d4d;
+  --shadow:0 14px 42px rgba(19,54,33,.08);
+  --radius:18px;
+}
+* {
+  box-sizing:border-box;
+}
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+button,input,select,textarea {
+  font:inherit;
+}
+button {
+  cursor:pointer;
+}
+button:disabled {
+  opacity:.48;
+  cursor:not-allowed;
+}
+.app {
+  min-height:100vh;
+}
+.topbar {
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner {
+  max-width:1320px;
+  margin:auto;
+  padding:14px 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.brand-mark {
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  background:var(--green);
+  color:white;
+  display:grid;
+  place-items:center;
+  font-size:21px;
+  font-weight:800;
+}
+.brand-name {
+  font-weight:850;
+  font-size:18px;
+  letter-spacing:-.5px;
+}
+.brand-sub {
+  font-size:11px;
+  color:var(--muted);
+  margin-top:1px;
+}
+.top-actions {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.status {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  font-size:12px;
+  color:var(--muted);
+  background:#fff;
+}
+.dot {
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#b9c3bc;
+}
+.status.ok .dot {
+  background:#28a365;
+}
+.status.bad .dot {
+  background:#d35b5b;
+}
+.btn {
+  border:0;
+  border-radius:11px;
+  padding:10px 14px;
+  font-weight:700;
+  font-size:13px;
+  transition:.15s;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.btn-primary {
+  background:var(--green);
+  color:white;
+}
+.btn-primary:hover {
+  background:var(--green-dark);
+}
+.btn-light {
+  background:#f1f5f1;
+  color:#304438;
+  border:1px solid var(--line);
+}
+.btn-light:hover {
+  background:#e9f1ea;
+}
+.btn-danger {
+  background:#fff0ef;
+  color:#a83f3f;
+  border:1px solid #f6d5d2;
+}
+.btn-small {
+  padding:7px 10px;
+  font-size:11px;
+  border-radius:9px;
+}
+.role-switch {
+  display:flex;
+  padding:4px;
+  background:#eff4ef;
+  border-radius:12px;
+  gap:3px;
+}
+.role-switch button {
+  border:0;
+  background:transparent;
+  padding:8px 11px;
+  border-radius:9px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:750;
+}
+.role-switch button.active {
+  background:white;
+  color:var(--green-dark);
+  box-shadow:0 2px 6px rgba(0,0,0,.06);
+}
+.wrap {
+  max-width:1320px;
+  margin:0 auto;
+  padding:28px;
+}
+.hero {
+  background:linear-gradient(115deg,#123e2c,#1b7250 68%,#43a477);
+  border-radius:24px;
+  padding:28px 32px;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  overflow:hidden;
+  position:relative;
+}
+.hero:after {
+  content:"";
+  position:absolute;
+  right:8%;
+  top:-90px;
+  width:340px;
+  height:340px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 0 0 38px rgba(255,255,255,.04),0 0 0 76px rgba(255,255,255,.025);
+}
+.hero-copy {
+  position:relative;
+  z-index:1;
+  max-width:720px;
+}
+.eyebrow {
+  text-transform:uppercase;
+  letter-spacing:1.8px;
+  font-size:10px;
+  font-weight:850;
+  color:#b8e6cc;
+}
+.hero h1 {
+  font-size:clamp(25px,4vw,38px);
+  line-height:1.12;
+  margin:8px 0 10px;
+  letter-spacing:-1px;
+}
+.hero p {
+  margin:0;
+  color:#d6eee0;
+  max-width:630px;
+  font-size:14px;
+}
+.hero-side {
+  position:relative;
+  z-index:1;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:16px;
+  padding:14px 18px;
+  min-width:190px;
+}
+.hero-side strong {
+  font-size:25px;
+  display:block;
+}
+.hero-side span {
+  font-size:11px;
+  color:#d6eee0;
+}
+.grid {
+  display:grid;
+  grid-template-columns:290px minmax(0,1fr);
+  gap:22px;
+  margin-top:22px;
+}
+.stack {
+  display:grid;
+  gap:18px;
+  align-content:start;
+}
+.panel {
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+.panel-pad {
+  padding:18px;
+}
+.panel-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:14px;
+}
+.panel-title {
+  font-size:14px;
+  font-weight:850;
+  letter-spacing:-.2px;
+}
+.muted {
+  color:var(--muted);
+}
+.micro {
+  font-size:11px;
+  color:var(--muted);
+}
+.field {
+  display:grid;
+  gap:6px;
+  margin:11px 0;
+}
+.field label {
+  font-size:11px;
+  font-weight:750;
+  color:#596b60;
+}
+.field input,.field select,.field textarea {
+  width:100%;
+  padding:10px 11px;
+  border:1px solid #dce5dd;
+  border-radius:10px;
+  background:#fbfdfb;
+  color:var(--ink);
+  outline:none;
+  font-size:13px;
+}
+.field input:focus,.field select:focus,.field textarea:focus {
+  border-color:#5ab582;
+  box-shadow:0 0 0 3px rgba(44,154,95,.1);
+}
+.field-row {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.filter-note {
+  padding:10px;
+  border-radius:10px;
+  background:var(--green-soft);
+  color:#286342;
+  font-size:11px;
+  margin-top:12px;
+}
+.metric-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:18px;
+}
+.metric {
+  padding:14px 16px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:15px;
+}
+.metric-label {
+  font-size:11px;
+  color:var(--muted);
+}
+.metric-value {
+  font-size:23px;
+  font-weight:850;
+  letter-spacing:-.8px;
+  margin-top:3px;
+}
+.metric-foot {
+  font-size:10px;
+  color:#718176;
+  margin-top:2px;
+}
+.content-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:14px;
+  margin:4px 0 14px;
+}
+.content-head h2 {
+  font-size:20px;
+  margin:0;
+  letter-spacing:-.7px;
+}
+.content-head p {
+  font-size:12px;
+  color:var(--muted);
+  margin:3px 0 0;
+}
+.listings {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;
+}
+.food-card {
+  border:1px solid var(--line);
+  background:white;
+  border-radius:16px;
+  padding:15px;
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+  min-width:0;
+}
+.food-top {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+.food-icon {
+  width:40px;
+  height:40px;
+  border-radius:13px;
+  background:#eff7f0;
+  display:grid;
+  place-items:center;
+  font-size:20px;
+}
+.pill {
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  padding:4px 8px;
+  font-size:10px;
+  font-weight:800;
+  background:#e9f5ed;
+  color:#267148;
+}
+.pill.warn {
+  background:#fff3df;
+  color:#9a611e;
+}
+.pill.danger {
+  background:#fff0ef;
+  color:#aa4141;
+}
+.food-title {
+  font-weight:850;
+  font-size:15px;
+  line-height:1.25;
+  margin-top:11px;
+  overflow-wrap:anywhere;
+}
+.food-meta {
+  font-size:11px;
+  color:var(--muted);
+  margin-top:5px;
+}
+.food-meta b {
+  color:#425348;
+}
+.food-bottom {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding-top:12px;
+  border-top:1px solid #edf1ed;
+}
+.food-actions {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.empty {
+  grid-column:1/-1;
+  padding:35px 20px;
+  text-align:center;
+  border:1px dashed #cbd8cd;
+  border-radius:16px;
+  background:#fbfdfb;
+  color:var(--muted);
+}
+.empty strong {
+  display:block;
+  color:#3b4f42;
+  margin-bottom:4px;
+}
+.tabs {
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+}
+.tab {
+  background:#fff;
+  border:1px solid var(--line);
+  padding:7px 11px;
+  border-radius:999px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:750;
+}
+.tab.active {
+  background:var(--green-soft);
+  border-color:#cce8d4;
+  color:var(--green-dark);
+}
+.table-wrap {
+  overflow:auto;
+  border:1px solid var(--line);
+  border-radius:13px;
+}
+table {
+  width:100%;
+  border-collapse:collapse;
+  min-width:470px;
+}
+th,td {
+  text-align:left;
+  padding:10px 12px;
+  border-bottom:1px solid #edf1ed;
+  font-size:11px;
+}
+th {
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  color:#758278;
+  background:#f8faf8;
+}
+td {
+  color:#33473a;
+}
+tr:last-child td {
+  border-bottom:0;
+}
+.sensor-grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:9px;
+}
+.sensor {
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fbfdfb;
+}
+.sensor-name {
+  font-weight:800;
+  font-size:12px;
+}
+.sensor-reading {
+  font-size:11px;
+  color:var(--muted);
+  margin-top:4px;
+}
+.sensor-temp {
+  font-size:17px;
+  font-weight:850;
+  margin-top:5px;
+}
+.trace {
+  margin-top:20px;
+  background:#10231a;
+  color:#d6e9db;
+  border-radius:16px;
+  overflow:hidden;
+}
+.trace-head {
+  padding:12px 15px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.trace-head strong {
+  font-size:11px;
+  color:#9fe0b6;
+  letter-spacing:.5px;
+}
+.trace-head span {
+  font-size:10px;
+  color:#b2c8b8;
+}
+.trace-body {
+  padding:14px 16px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.trace-col small {
+  display:block;
+  color:#90a99a;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:5px;
+}
+.trace pre {
+  margin:0;
+  white-space:pre-wrap;
+  word-break:break-word;
+  font:10px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+  color:#dcf0e1;
+  max-height:170px;
+  overflow:auto;
+}
+.notice {
+  padding:11px 13px;
+  border:1px solid #f1d8ab;
+  background:#fff9ed;
+  color:#86551c;
+  border-radius:11px;
+  font-size:11px;
+  margin-bottom:14px;
+}
+.error {
+  padding:11px 13px;
+  border:1px solid #f2cfcc;
+  background:#fff3f2;
+  color:#9d3f3a;
+  border-radius:11px;
+  font-size:11px;
+  margin:12px 0;
+}
+.success {
+  padding:11px 13px;
+  border:1px solid #cce8d4;
+  background:#eff9f1;
+  color:#23613b;
+  border-radius:11px;
+  font-size:11px;
+  margin:12px 0;
+}
+.overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(11,25,17,.48);
+  z-index:50;
+  display:grid;
+  place-items:center;
+  padding:20px;
+}
+.modal {
+  width:min(560px,100%);
+  max-height:90vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:20px;
+  padding:23px;
+  box-shadow:0 25px 100px rgba(0,0,0,.25);
+}
+.modal-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+.modal-head h3 {
+  margin:0;
+  font-size:18px;
+}
+.close {
+  border:0;
+  background:#f1f5f1;
+  width:30px;
+  height:30px;
+  border-radius:9px;
+  font-size:18px;
+  color:#516357;
+}
+.hidden {
+  display:none!important;
+}
+.footer {
+  padding:25px 4px 12px;
+  text-align:center;
+  color:#88948b;
+  font-size:10px;
+}
+.spinner {
+  display:inline-block;
+  width:12px;
+  height:12px;
+  border:2px solid rgba(255,255,255,.35);
+  border-top-color:white;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform:rotate(360deg);
+  }
+}
+@media(max-width:900px) {
+  .grid {
+    grid-template-columns:1fr;
+  }
+  .metric-grid {
+    grid-template-columns:repeat(3,1fr);
+  }
+  .topbar-inner {
+    padding:12px 16px;
+  }
+  .wrap {
+    padding:18px;
+  }
+  .hero {
+    padding:24px;
+  }
+  .hero-side {
+    display:none;
+  }
+}
+@media(max-width:620px) {
+  .topbar-inner {
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .top-actions {
+    width:100%;
+    justify-content:space-between;
+  }
+  .hero {
+    padding:21px;
+  }
+  .listings {
+    grid-template-columns:1fr;
+  }
+  .trace-body {
+    grid-template-columns:1fr;
+  }
+  .metric-grid {
+    grid-template-columns:1fr 1fr;
+  }
+  .field-row {
+    grid-template-columns:1fr;
+  }
+  .sensor-grid {
+    grid-template-columns:1fr;
+  }
+}
+.grid {
+  align-items:start;
+}
+.grid>.stack {
+  min-width:0;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+}
+.grid>.stack>* {
+  min-width:0;
+  max-width:100%;
+}
+.grid .panel,.grid .trace,.grid .content-head {
+  min-width:0;
+  width:100%;
+}
+.content-head {
+  flex-wrap:wrap;
+}
+.table-wrap {
+  max-width:100%;
+}
+.trace-body {
+  min-width:0;
+}
+.trace-col {
+  min-width:0;
+}
+@media(max-width:900px) {
+  .grid {
+    grid-template-columns:minmax(0,1fr);
+  }
+}
+
+/* ---- v2 additions ---- */
+.metric-grid { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) { .metric-grid { grid-template-columns: repeat(2, 1fr); } }
+.role-badge { display: inline-flex; align-items: center; padding: 8px 12px; border-radius: 999px; background: var(--green-soft); color: var(--green-dark); font-size: 12px; font-weight: 800; }
+.btn-ok { background: #e8f5ed; color: #11643e; border: 1px solid #cce8d4; }
+.row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.sensor-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 15px; }
+.sensor-tools select { padding: 7px 10px; border: 1px solid #dce5dd; border-radius: 9px; background: #fbfdfb; font-size: 12px; }
+.btn:focus-visible, .tab:focus-visible, .close:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgba(44, 154, 95, .35); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<noscript><div class="error" style="margin:20px">ReFood needs JavaScript and an internet connection to talk to Supabase.</div></noscript>
+<div class="app">
+
+<header class="topbar"><div class="topbar-inner">
+  <div class="brand">
+    <div class="brand-mark">R</div>
+    <div>
+      <div class="brand-name">ReFood <span style="color:var(--green)">Astana</span></div>
+      <div class="brand-sub">Surplus food exchange · ICT Final Project</div>
+    </div>
+  </div>
+  <div class="top-actions">
+    <div id="connectionStatus" class="status"><i class="dot"></i><span>Connecting…</span></div>
+    <span id="roleBadge" class="role-badge hidden"></span>
+    <button class="btn btn-light" data-action="open-settings">⚙ Database settings</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow">Food rescue · Astana, Kazakhstan</div>
+      <h1>Good food deserves<br>another destination.</h1>
+      <p>ReFood connects local food donors with people and organizations who can use surplus food. Browse, reserve, and track food rescue through one shared database.</p>
+    </div>
+    <div class="hero-side"><strong id="heroListingCount">—</strong><span>available listings in Supabase</span></div>
+  </section>
+
+  <div id="globalMessage" role="status" aria-live="polite"></div>
+
+  <section class="metric-grid">
+    <div class="metric"><div class="metric-label">Available food</div><div class="metric-value" id="metricAvailable">—</div><div class="metric-foot">COUNT · status = Available</div></div>
+    <div class="metric"><div class="metric-label">Food volume listed</div><div class="metric-value" id="metricKg">—</div><div class="metric-foot">SUM(quantity_kg)</div></div>
+    <div class="metric"><div class="metric-label">Food claims</div><div class="metric-value" id="metricClaims">—</div><div class="metric-foot">COUNT · food_claims</div></div>
+    <div class="metric"><div class="metric-label">Food rescued</div><div class="metric-value" id="metricRescued">—</div><div class="metric-foot" id="metricRescuedFoot">SUM · approved claims</div></div>
+  </section>
+
+  <div class="grid">
+    <aside class="stack">
+      <section class="panel panel-pad">
+        <div class="panel-head"><div class="panel-title">Your workspace</div><span class="pill">LIVE DATA</span></div>
+        <form id="authForm">
+          <div class="field"><label for="authEmail">Email</label><input id="authEmail" type="email" required autocomplete="username"></div>
+          <div class="field"><label for="authPassword">Password</label><input id="authPassword" type="password" required autocomplete="current-password"></div>
+          <button id="signInButton" class="btn btn-primary" type="submit">Sign in</button>
+        </form>
+        <button id="signOutButton" class="btn btn-light btn-small hidden" data-action="sign-out">Sign out</button>
+        <div class="micro" id="activeUserHelp">Sign in with a Supabase Auth account whose email matches a ReFood user.</div>
+      </section>
+
+      <section class="panel panel-pad">
+        <div class="panel-head"><div class="panel-title">Find food</div><span class="micro">SELECT · WHERE</span></div>
+        <div class="field"><label for="categoryFilter">Category</label>
+          <select id="categoryFilter"><option value="">All categories</option><option>Bakery</option><option>Dairy</option><option>Ready Meals</option><option>Produce</option><option>Packaged</option></select></div>
+        <div class="field"><label for="districtFilter">District</label>
+          <select id="districtFilter"><option value="">All districts</option></select></div>
+        <div class="field"><label for="statusFilter">Listing status</label>
+          <select id="statusFilter"><option value="Available">Available only</option><option value="">All statuses</option><option>Reserved</option><option>Expired</option></select></div>
+        <button class="btn btn-primary" style="width:100%" data-action="apply-filters">⌕ Apply filters</button>
+        <div class="filter-note">Filters are sent to the Supabase database as a WHERE clause. Nothing here comes from local sample data.</div>
+      </section>
+
+      <section class="panel panel-pad">
+        <div class="panel-head"><div class="panel-title">Donor impact</div><button class="btn btn-light btn-small" data-action="refresh-donors">Refresh</button></div>
+        <div id="donorSummary" class="micro">Sign in to load donor statistics.</div>
+      </section>
+    </aside>
+
+    <section class="stack">
+      <div class="content-head">
+        <div><h2 id="listTitle">Available food near you</h2><p id="listSubtitle">Browse listings returned by your live Supabase database.</p></div>
+        <div class="tabs" role="tablist">
+          <button id="tabBrowse" class="tab active" data-action="show-panel" data-panel="browse">Food listings</button>
+          <button id="tabClaims" class="tab" data-action="show-panel" data-panel="claims">Claims</button>
+          <button id="tabSensors" class="tab" data-action="show-panel" data-panel="sensors">Smart storage</button>
+        </div>
+      </div>
+
+      <div id="browsePanel" class="panel panel-pad">
+        <div class="panel-head">
+          <div class="panel-title">Food listings <span id="listingCount" class="micro">—</span></div>
+          <div id="donorActions" class="hidden" style="display:flex;gap:7px;flex-wrap:wrap">
+            <button class="btn btn-light btn-small" data-action="open-location">+ Pickup location</button>
+            <button class="btn btn-primary btn-small" data-action="open-listing">+ New listing</button>
+          </div>
+        </div>
+        <div id="listingGrid" class="listings"><div class="empty"><strong>Sign in to continue</strong>Listings are loaded from Supabase after you sign in.</div></div>
+      </div>
+
+      <div id="claimsPanel" class="panel panel-pad hidden">
+        <div class="panel-head"><div class="panel-title" id="claimsTitle">Food claims</div><button class="btn btn-light btn-small" data-action="refresh-claims">Refresh</button></div>
+        <div id="claimsTable" class="micro">No claims loaded.</div>
+      </div>
+
+      <div id="sensorsPanel" class="panel panel-pad hidden">
+        <div class="panel-head">
+          <div><div class="panel-title">Smart storage monitor</div><div class="micro">Real telemetry · smart_food_sensors</div></div>
+          <button class="btn btn-light btn-small" data-action="refresh-sensors">↻ Refresh</button>
+        </div>
+        <div id="sensorSummary" class="micro">Sensor aggregation loads from the database function.</div>
+        <div style="height:12px"></div>
+        <div id="sensorReadings" class="sensor-grid"></div>
+        <div id="sensorTools" class="hidden">
+          <div class="sensor-tools">
+            <select id="testSensorListing" aria-label="Test listing"><option value="">Choose your EXAM TEST listing</option></select>
+            <button class="btn btn-light btn-small" data-action="add-test-reading">Add old test reading · INSERT</button>
+            <button class="btn btn-danger btn-small" data-action="cleanup-test">Delete old test readings · DELETE</button>
+          </div>
+          <div class="micro" style="margin-top:9px">Only readings marked EXAM-BOX on your own EXAM TEST listings can be removed. Historical readings are never touched.</div>
+        </div>
+      </div>
+
+      <section class="trace">
+        <div class="trace-head"><strong>DATABASE ACTIVITY · SQL TRACE</strong><span id="traceStatus">No operation yet</span></div>
+        <div class="trace-body">
+          <div class="trace-col"><small>SQL equivalent / server function</small><pre id="traceSql">Use any action to see its query.</pre></div>
+          <div class="trace-col"><small>Actual Supabase response</small><pre id="traceResult">No response yet.</pre></div>
+        </div>
+      </section>
+    </section>
+  </div>
+  <div class="footer">ReFood Astana · Supabase-connected prototype · No mock records, no simulated database writes</div>
+</main>
+</div>
+
+<!-- Settings -->
+<div id="settingsModal" class="overlay hidden"><div class="modal">
+  <div class="modal-head"><h3>Supabase connection</h3><button class="close" aria-label="Close" data-action="close-modal" data-modal="settingsModal">×</button></div>
+  <div class="notice">Use only the Project URL and the publishable (anon) key. Never paste a service_role key into a browser application.</div>
+  <div class="field"><label for="projectUrl">Project URL</label><input id="projectUrl" placeholder="https://your-project.supabase.co"></div>
+  <div class="field"><label for="projectKey">Publishable / anon key</label><input id="projectKey" type="password" placeholder="sb_publishable_…"></div>
+  <div style="display:flex;gap:9px;justify-content:space-between;margin-top:18px;flex-wrap:wrap">
+    <button class="btn btn-light" data-action="reset-settings">Reset to default</button>
+    <div style="display:flex;gap:9px"><button class="btn btn-light" data-action="close-modal" data-modal="settingsModal">Cancel</button><button class="btn btn-primary" data-action="save-settings">Connect</button></div>
+  </div>
+  <div id="settingsMessage"></div>
+</div></div>
+
+<!-- New listing -->
+<div id="listingModal" class="overlay hidden"><div class="modal">
+  <div class="modal-head"><h3>Create food listing</h3><button class="close" aria-label="Close" data-action="close-modal" data-modal="listingModal">×</button></div>
+  <form id="listingForm">
+    <div class="field"><label for="newTitle">Food title</label><input id="newTitle" required maxlength="100" placeholder="Fresh bakery box"></div>
+    <div class="micro">Demo mode: “EXAM TEST ” is added in front of the title automatically so real records stay protected.</div>
+    <div class="field-row">
+      <div class="field"><label for="newCategory">Category</label><select id="newCategory" required><option>Bakery</option><option>Dairy</option><option>Ready Meals</option><option>Produce</option><option>Packaged</option></select></div>
+      <div class="field"><label for="newQuantity">Quantity (kg)</label><input id="newQuantity" type="number" min="0.1" step="0.1" required value="5"></div>
+    </div>
+    <div class="field"><label for="newLocation">Pickup location</label><select id="newLocation" required><option value="">Loading your locations…</option></select></div>
+    <div class="field"><label for="newExpiry">Expiry date and time</label><input id="newExpiry" type="datetime-local" required></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px">
+      <button type="button" class="btn btn-light" data-action="close-modal" data-modal="listingModal">Cancel</button>
+      <button type="submit" class="btn btn-primary">Save listing · INSERT</button>
+    </div>
+  </form>
+  <div id="listingMessage"></div>
+</div></div>
+
+<!-- New pickup location -->
+<div id="locationModal" class="overlay hidden"><div class="modal">
+  <div class="modal-head"><h3>Add pickup location</h3><button class="close" aria-label="Close" data-action="close-modal" data-modal="locationModal">×</button></div>
+  <form id="locationForm">
+    <div class="field"><label for="locationAddress">Street address</label><input id="locationAddress" required maxlength="180" placeholder="Street, building"></div>
+    <div class="field-row">
+      <div class="field"><label for="locationCity">City</label><input id="locationCity" value="Astana" required></div>
+      <div class="field"><label for="locationDistrict">District</label><input id="locationDistrict" required placeholder="Yesil"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px">
+      <button type="button" class="btn btn-light" data-action="close-modal" data-modal="locationModal">Cancel</button>
+      <button type="submit" class="btn btn-primary">Save location · INSERT</button>
+    </div>
+  </form>
+  <div id="locationMessage"></div>
+</div></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   ReFood Astana — front end for the existing Supabase project.
+   Only the publishable (anon) key is used. Row Level Security and the
+   refood_* database functions decide what each signed-in user may do.
+   ===================================================================== */
+
+const CONFIG = {
+  url: 'https://wilxkbjnnsisntclvepw.supabase.co',
+  key: 'sb_publishable_Q3inLWcGlQ9w0TQlPwif3A_GCTgE9Xx',
+  demoPrefix: 'EXAM TEST '          // only these listings may be booked / changed / deleted
+};
+const LISTING_COLS = 'listing_id,donor_id,location_id,title,category,quantity_kg,expiry_timestamp,status';
+const CLAIM_COLS   = 'claim_id,listing_id,recipient_id,claim_timestamp,claim_status';
+const SENSOR_COLS  = 'sensor_id,listing_id,storage_box_id,temperature_celsius,humidity_percent,spoilage_risk,recorded_at';
+
+const state = { sb: null, user: null, donors: [], locations: [], listings: [], panel: 'browse' };
+
+/* ---------- small helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const sqlStr = s => "'" + String(s).replace(/'/g, "''") + "'";
+const isDemo = title => String(title || '').startsWith(CONFIG.demoPrefix);
+const fmtDate = v => (v ? new Date(v).toLocaleString() : '—');
+const isDonor = () => state.user?.role === 'Donor';
+const isRecipient = () => state.user?.role === 'Recipient';
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage may be blocked */ } },
+  del(k) { try { localStorage.removeItem(k); } catch { /* ignore */ } }
+};
+
+function setConnection(kind, label) {   // kind: 'ok' | 'bad' | ''
+  const el = $('connectionStatus');
+  el.className = 'status ' + kind;
+  el.innerHTML = '<i class="dot"></i><span>' + esc(label) + '</span>';
+}
+function notify(text, type = 'success', target = 'globalMessage') {
+  const el = $(target);
+  if (el) el.innerHTML = '<div class="' + (type === 'error' ? 'error' : 'success') + '">' + esc(text) + '</div>';
+}
+function clearNotice(target = 'globalMessage') { if ($(target)) $(target).innerHTML = ''; }
+
+function showTrace(sql, result, status) {
+  $('traceSql').textContent = sql;
+  $('traceResult').textContent = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+  $('traceStatus').textContent = status;
+}
+function failTrace(sql, err) {
+  showTrace(sql, { error: err?.message || String(err), details: err?.details ?? null, hint: err?.hint ?? null }, 'Database error');
+}
+// Friendly text when an optional database function has not been installed yet.
+function explain(err) {
+  if (err?.code === 'PGRST202' || /could not find the function/i.test(err?.message || '')) {
+    return 'This feature needs ReFood_Upgrade_Optional.sql to be run once in the Supabase SQL Editor.';
+  }
+  return err?.message || String(err);
+}
+function openModal(id) { $(id).classList.remove('hidden'); }
+function closeModal(id) { $(id).classList.add('hidden'); }
+
+/* ---------- connection & authentication ---------- */
+async function connect() {
+  clearNotice();
+  const url = store.get('refood_url') || CONFIG.url;
+  const key = store.get('refood_key') || CONFIG.key;
+  if (!window.supabase?.createClient) {
+    setConnection('bad', 'Supabase SDK unavailable');
+    notify('The Supabase library did not load. Check your internet connection.', 'error');
+    return;
+  }
+  state.sb = window.supabase.createClient(url, key);
+  const { data, error } = await state.sb.auth.getSession();
+  if (error) { setConnection('bad', 'Authentication unavailable'); notify(error.message, 'error'); return; }
+  if (data.session) await loadIdentity(); else renderSignedOut('Sign in to load ReFood data.');
+}
+
+function renderSignedOut(help) {
+  Object.assign(state, { user: null, donors: [], locations: [], listings: [] });
+  $('authForm').classList.remove('hidden');
+  $('signOutButton').classList.add('hidden');
+  $('roleBadge').classList.add('hidden');
+  $('donorActions').classList.add('hidden');
+  $('sensorTools').classList.add('hidden');
+  $('activeUserHelp').textContent = help;
+  $('listingGrid').innerHTML = '<div class="empty"><strong>Sign in to continue</strong>Listings are loaded from Supabase after you sign in.</div>';
+  $('listingCount').textContent = '—';
+  $('claimsTable').textContent = 'Sign in to view claims.';
+  $('donorSummary').textContent = 'Sign in to load donor statistics.';
+  ['metricAvailable', 'metricKg', 'metricClaims', 'metricRescued', 'heroListingCount'].forEach(id => { $(id).textContent = '—'; });
+  setConnection('', 'Sign in required');
+}
+
+async function signIn(e) {
+  e.preventDefault();
+  if (!state.sb) { notify('Not connected to Supabase yet.', 'error'); return; }
+  const btn = $('signInButton');
+  btn.disabled = true;
+  const { error } = await state.sb.auth.signInWithPassword({ email: $('authEmail').value.trim(), password: $('authPassword').value });
+  $('authPassword').value = '';
+  btn.disabled = false;
+  if (error) { notify('Sign-in failed: ' + error.message, 'error'); return; }
+  await loadIdentity();
+}
+
+async function signOut() {
+  if (!state.sb) return;
+  await state.sb.auth.signOut();
+  renderSignedOut('Signed out. Sign in to continue.');
+  notify('Signed out.');
+}
+
+async function loadIdentity() {
+  const sb = state.sb;
+  const { data: auth, error: authError } = await sb.auth.getUser();
+  if (authError || !auth.user?.email) { notify('Could not verify your session. Please sign in again.', 'error'); return; }
+
+  // RLS lets a user read only their own row, matched by verified e-mail.
+  const { data: me, error: meError } = await sb.from('users').select('user_id,full_name,role').eq('email', auth.user.email).maybeSingle();
+  if (meError || !me) {
+    setConnection('bad', 'ReFood account not linked');
+    notify('No ReFood user matches this e-mail. ' + (meError?.message || ''), 'error');
+    return;
+  }
+  if (me.role !== 'Donor' && me.role !== 'Recipient') {
+    setConnection('bad', 'Unsupported role');
+    notify('Use a Donor or Recipient account.', 'error');
+    return;
+  }
+
+  const [donors, locations] = await Promise.all([
+    sb.rpc('refood_public_donors'),
+    sb.from('pickup_locations').select('location_id,donor_id,address,city,district').order('location_id')
+  ]);
+  const failed = donors.error || locations.error;
+  if (failed) { setConnection('bad', 'Database access incomplete'); notify(failed.message, 'error'); return; }
+
+  state.user = me;
+  state.donors = [me, ...(donors.data || []).filter(d => d.user_id !== me.user_id).map(d => ({ ...d, role: 'Donor' }))];
+  state.locations = locations.data || [];
+
+  $('authForm').classList.add('hidden');
+  $('signOutButton').classList.remove('hidden');
+  $('roleBadge').textContent = me.role + ' · ' + me.full_name;
+  $('roleBadge').classList.remove('hidden');
+  $('donorActions').classList.toggle('hidden', !isDonor());
+  $('sensorTools').classList.toggle('hidden', !isDonor());
+  $('activeUserHelp').textContent = 'Signed in: ' + me.full_name + ' (' + me.role + ').';
+  $('claimsTitle').textContent = isDonor() ? 'Claims on your listings' : 'Your food claims';
+  syncStatusFilter();
+  populateDistricts();
+  setConnection('ok', 'Supabase connected');
+  await refreshAll();
+  notify('Signed in. Data loaded from Supabase.');
+}
+
+/* ---------- filters ---------- */
+function syncStatusFilter() {
+  const select = $('statusFilter');
+  for (const option of select.options) {
+    const hidden = isRecipient() && option.value !== 'Available';   // recipients may only see Available
+    option.hidden = hidden;
+    option.disabled = hidden;
+  }
+  if (isRecipient()) select.value = 'Available';
+}
+function populateDistricts() {
+  const select = $('districtFilter'), current = select.value;
+  const districts = [...new Set(state.locations.map(l => l.district).filter(Boolean))].sort();
+  select.innerHTML = '<option value="">All districts</option>' + districts.map(d => '<option>' + esc(d) + '</option>').join('');
+  select.value = districts.includes(current) ? current : '';
+}
+
+/* ---------- panels ---------- */
+function showPanel(name) {
+  state.panel = name;
+  for (const p of ['browse', 'claims', 'sensors']) {
+    $(p + 'Panel').classList.toggle('hidden', p !== name);
+    $('tab' + p[0].toUpperCase() + p.slice(1)).classList.toggle('active', p === name);
+  }
+  if (name === 'claims') loadClaims();
+  if (name === 'sensors') { loadSensors(); loadTestSensorListings(); }
+}
+
+async function refreshAll() {
+  await Promise.allSettled([loadMetrics(), loadDonorSummary(false)]);
+  await loadListings(true);
+}
+const afterWrite = () => Promise.allSettled([loadListings(false), loadMetrics()]);
+
+/* ---------- SELECT: metrics (aggregation) ---------- */
+async function loadMetrics() {
+  if (!state.sb || !state.user) return;
+  const [m, i] = await Promise.allSettled([state.sb.rpc('refood_food_metrics'), state.sb.rpc('refood_impact')]);
+  const metrics = m.status === 'fulfilled' && !m.value.error ? (m.value.data || [])[0] : null;
+  $('metricAvailable').textContent = metrics?.available_count ?? '—';
+  $('heroListingCount').textContent = metrics?.available_count ?? '—';
+  $('metricKg').textContent = metrics ? Number(metrics.total_quantity_kg || 0).toFixed(1) + ' kg' : '—';
+  $('metricClaims').textContent = metrics?.claim_count ?? '—';
+
+  const impact = i.status === 'fulfilled' && !i.value.error ? (i.value.data || [])[0] : null;
+  $('metricRescued').textContent = impact ? Number(impact.rescued_kg || 0).toFixed(1) + ' kg' : '—';
+  $('metricRescuedFoot').textContent = impact ? 'SUM · approved claims' : 'Optional: run upgrade SQL';
+}
+
+/* ---------- SELECT ... WHERE: listings ---------- */
+async function loadListings(withTrace = true) {
+  const sb = state.sb;
+  if (!sb || !state.user) return;
+  const category = $('categoryFilter').value, status = $('statusFilter').value, district = $('districtFilter').value;
+
+  let q = sb.from('food_listings').select(LISTING_COLS).order('expiry_timestamp', { ascending: true });
+  const where = [];
+  if (category) { q = q.eq('category', category); where.push('category = ' + sqlStr(category)); }
+  if (status) { q = q.eq('status', status); where.push('status = ' + sqlStr(status)); }
+  if (isRecipient() && status === 'Available') { q = q.gt('expiry_timestamp', new Date().toISOString()); where.push('expiry_timestamp > NOW()'); }
+  if (isDonor()) { q = q.eq('donor_id', state.user.user_id); where.push('donor_id = ' + state.user.user_id); }
+  if (district) {
+    const ids = state.locations.filter(l => l.district === district).map(l => l.location_id);
+    where.push('location_id IN (' + (ids.join(', ') || 'NULL') + ')');
+    if (ids.length) q = q.in('location_id', ids);
+  }
+  const sql = 'SELECT ' + LISTING_COLS.replace(/,/g, ', ') + '\nFROM food_listings' + (where.length ? '\nWHERE ' + where.join('\n  AND ') : '') + '\nORDER BY expiry_timestamp ASC;';
+
+  try {
+    let rows = [];
+    if (!(district && !state.locations.some(l => l.district === district))) {
+      const { data, error } = await q;
+      if (error) throw error;
+      rows = data || [];
+    }
+    const donorById = new Map(state.donors.map(u => [u.user_id, u]));
+    const locById = new Map(state.locations.map(l => [l.location_id, l]));
+    state.listings = rows.map(r => ({ ...r, donor: donorById.get(r.donor_id), location: locById.get(r.location_id) }));
+    renderListings();
+    if (withTrace) showTrace(sql, { rows, count: rows.length }, 'SELECT successful');   // raw rows, exactly as returned
+  } catch (e) {
+    $('listingGrid').innerHTML = '<div class="empty"><strong>Could not load listings</strong>' + esc(e.message) + '</div>';
+    failTrace(sql, e);
+  }
+}
+
+function listingActions(x) {
+  if (!isDemo(x.title)) return '<span class="micro">Historical record · read only</span>';
+  if (isRecipient()) {
+    const open = x.status === 'Available' && new Date(x.expiry_timestamp) > new Date();
+    return open ? '<button class="btn btn-primary btn-small" data-action="book" data-id="' + Number(x.listing_id) + '">Reserve food</button>' : '<span class="micro">Not available</span>';
+  }
+  if (x.status === 'Available') {
+    return '<button class="btn btn-light btn-small" data-action="mark-reserved" data-id="' + Number(x.listing_id) + '">Mark reserved</button>' +
+           '<button class="btn btn-danger btn-small" data-action="delete-listing" data-id="' + Number(x.listing_id) + '">Delete</button>';
+  }
+  return '<span class="micro">No actions for ' + esc(x.status) + '</span>';
+}
+function categoryIcon(c) { return ({ Bakery: '🥐', Dairy: '🥛', 'Ready Meals': '🍱', Produce: '🥬', Packaged: '🥪' })[c] || '🍎'; }
+
+function renderListings() {
+  const rows = state.listings;
+  $('listingCount').textContent = '· ' + rows.length + ' record' + (rows.length === 1 ? '' : 's');
+  $('listTitle').textContent = isDonor() ? 'Your food listings' : 'Available food near you';
+  $('listSubtitle').textContent = isDonor() ? 'Manage the records you own.' : 'Browse listings returned by your live Supabase database.';
+  if (!rows.length) {
+    $('listingGrid').innerHTML = '<div class="empty"><strong>No matching records</strong>Try another filter' + (isDonor() ? ' or create a new listing.' : '.') + '</div>';
+    return;
+  }
+  $('listingGrid').innerHTML = rows.map(x => {
+    const status = String(x.status || 'Unknown');
+    const pill = status === 'Available' ? 'pill' : status === 'Reserved' ? 'pill warn' : 'pill danger';
+    const where = x.location ? [x.location.address, x.location.district, x.location.city].filter(Boolean).join(' · ') : 'Pickup location not linked';
+    return '<article class="food-card"><div>' +
+      '<div class="food-top"><div class="food-icon">' + categoryIcon(x.category) + '</div><span class="' + pill + '">' + esc(status) + '</span></div>' +
+      '<div class="food-title">' + esc(x.title) + '</div>' +
+      '<div class="food-meta">' + esc(x.category || 'Uncategorised') + ' · <b>' + esc(Number(x.quantity_kg || 0).toFixed(1)) + ' kg</b></div>' +
+      '<div class="food-meta">⌖ ' + esc(where) + '</div>' +
+      '<div class="food-meta">Donor: ' + esc(x.donor?.full_name || 'Unknown') + '</div>' +
+      '<div class="food-meta">Expiry: ' + esc(fmtDate(x.expiry_timestamp)) + '</div></div>' +
+      '<div class="food-bottom"><span class="micro">Listing #' + Number(x.listing_id) + '</span><div class="food-actions">' + listingActions(x) + '</div></div></article>';
+  }).join('');
+}
+
+/* ---------- INSERT + UPDATE: booking (one database transaction) ---------- */
+async function bookFood(id) {
+  const row = state.listings.find(x => x.listing_id === id);
+  if (!isRecipient() || !row || row.status !== 'Available' || !isDemo(row.title) || new Date(row.expiry_timestamp) <= new Date()) {
+    notify('This listing has expired or is unavailable.', 'error'); return;
+  }
+  const sql = '-- refood_book_listing(' + id + ') runs in ONE transaction:\n' +
+    'INSERT INTO food_claims (listing_id, recipient_id, claim_status)\n  VALUES (' + id + ', <your user_id>, \'Pending\');\n' +
+    'UPDATE food_listings SET status = \'Reserved\' WHERE listing_id = ' + id + ';';
+  try {
+    const { data, error } = await state.sb.rpc('refood_book_listing', { p_listing_id: id });
+    if (error) throw error;
+    await afterWrite();
+    showTrace(sql, data, 'Booking committed');
+    notify('Reservation saved in Supabase.');
+  } catch (e) { failTrace(sql, e); notify('Booking failed: ' + e.message, 'error'); }
+}
+
+/* ---------- UPDATE / DELETE: donor listing management ---------- */
+async function updateListing(id, newStatus) {
+  if (!isDonor()) return;
+  const sql = 'UPDATE food_listings\nSET status = ' + sqlStr(newStatus) + '\nWHERE listing_id = ' + id + '\nRETURNING listing_id, title, status;';
+  try {
+    const { data, error } = await state.sb.from('food_listings').update({ status: newStatus }).eq('listing_id', id).select('listing_id,title,status').single();
+    if (error) throw error;
+    await afterWrite();
+    showTrace(sql, data, 'UPDATE successful');
+    notify('Listing #' + id + ' updated to ' + newStatus + '.');
+  } catch (e) { failTrace(sql, e); notify('Update failed: ' + e.message, 'error'); }
+}
+
+async function deleteListing(id) {
+  if (!isDonor()) return;
+  if (!confirm('Delete listing #' + id + '? This is permanent and only works when no claims or sensor readings reference it.')) return;
+  const checkSql = 'SELECT claim_id FROM food_claims WHERE listing_id = ' + id + ';\nSELECT sensor_id FROM smart_food_sensors WHERE listing_id = ' + id + ';';
+  try {
+    const [claims, sensors] = await Promise.all([
+      state.sb.from('food_claims').select('claim_id').eq('listing_id', id),
+      state.sb.from('smart_food_sensors').select('sensor_id').eq('listing_id', id)
+    ]);
+    if (claims.error) throw claims.error;
+    if (sensors.error) throw sensors.error;
+    if ((claims.data || []).length || (sensors.data || []).length) {
+      showTrace(checkSql, { claims: claims.data, sensorReadings: sensors.data, deleted: false }, 'Delete blocked by linked records');
+      notify('This listing has linked claims or sensor readings, so it is protected (foreign-key integrity).', 'error');
+      return;
+    }
+    const sql = 'DELETE FROM food_listings\nWHERE listing_id = ' + id + '\nRETURNING listing_id;';
+    const { data, error } = await state.sb.from('food_listings').delete().eq('listing_id', id).select('listing_id');
+    if (error) throw error;
+    await afterWrite();
+    showTrace(sql, { deleted: data }, 'DELETE successful');
+    notify('Listing deleted from food_listings.');
+  } catch (e) { failTrace(checkSql, e); notify('Delete failed: ' + e.message, 'error'); }
+}
+
+/* ---------- INSERT: listing and pickup location ---------- */
+function openListingModal() {
+  const own = state.locations.filter(l => l.donor_id === state.user.user_id);
+  $('newLocation').innerHTML = '<option value="">Select pickup location</option>' + own.map(l => '<option value="' + l.location_id + '">' + esc(l.address + ' · ' + (l.district || l.city || '')) + '</option>').join('');
+  $('listingMessage').innerHTML = '';
+  if (!own.length) notify('You have no pickup location yet. Add one first.', 'error', 'listingMessage');
+  const d = new Date(Date.now() + 24 * 3600 * 1000);
+  $('newExpiry').value = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  openModal('listingModal');
+}
+
+async function createListing(e) {
+  e.preventDefault();
+  if (!isDonor()) return;
+  let title = $('newTitle').value.trim();
+  if (!isDemo(title)) title = CONFIG.demoPrefix + title;
+  const payload = {
+    donor_id: state.user.user_id,
+    location_id: Number($('newLocation').value),
+    title,
+    category: $('newCategory').value,
+    quantity_kg: Number($('newQuantity').value),
+    expiry_timestamp: new Date($('newExpiry').value).toISOString(),
+    status: 'Available'
+  };
+  if (!payload.location_id || !(payload.quantity_kg > 0)) { notify('Complete all fields.', 'error', 'listingMessage'); return; }
+  const sql = 'INSERT INTO food_listings (donor_id, location_id, title, category, quantity_kg, expiry_timestamp, status)\nVALUES (' +
+    [payload.donor_id, payload.location_id, sqlStr(payload.title), sqlStr(payload.category), payload.quantity_kg, sqlStr(payload.expiry_timestamp), "'Available'"].join(', ') +
+    ')\nRETURNING listing_id, title, status;';
+  try {
+    const { data, error } = await state.sb.from('food_listings').insert(payload).select(LISTING_COLS).single();
+    if (error) throw error;
+    closeModal('listingModal');
+    $('listingForm').reset();
+    await afterWrite();
+    showTrace(sql, data, 'INSERT successful');
+    notify('New listing saved to food_listings.');
+  } catch (err) { failTrace(sql, err); notify('Insert failed: ' + err.message, 'error', 'listingMessage'); }
+}
+
+async function createLocation(e) {
+  e.preventDefault();
+  if (!isDonor()) return;
+  const payload = { donor_id: state.user.user_id, address: $('locationAddress').value.trim(), city: $('locationCity').value.trim(), district: $('locationDistrict').value.trim() };
+  const sql = 'INSERT INTO pickup_locations (donor_id, address, city, district)\nVALUES (' + [payload.donor_id, sqlStr(payload.address), sqlStr(payload.city), sqlStr(payload.district)].join(', ') + ')\nRETURNING location_id, address, district;';
+  try {
+    const { data, error } = await state.sb.from('pickup_locations').insert(payload).select('location_id,donor_id,address,city,district').single();
+    if (error) throw error;
+    state.locations.push(data);
+    populateDistricts();
+    $('locationForm').reset();
+    $('locationCity').value = 'Astana';
+    closeModal('locationModal');
+    showTrace(sql, data, 'INSERT successful');
+    notify('Pickup location added. You can now create a listing at this address.');
+  } catch (err) { failTrace(sql, err); notify('Could not save pickup location: ' + err.message, 'error', 'locationMessage'); }
+}
+
+/* ---------- claims: SELECT, and optional UPDATE / DELETE through functions ---------- */
+async function loadClaims() {
+  const sb = state.sb, box = $('claimsTable');
+  if (!sb || !state.user) { box.textContent = 'Sign in to view claims.'; return; }
+  const uid = state.user.user_id;
+  let titles = new Map(), q = sb.from('food_claims').select(CLAIM_COLS).order('claim_timestamp', { ascending: false }), sql;
+
+  if (isDonor()) {
+    const own = await sb.from('food_listings').select('listing_id,title').eq('donor_id', uid);
+    if (own.error) { box.textContent = 'Unable to load your listings: ' + own.error.message; return; }
+    const ids = (own.data || []).map(x => x.listing_id);
+    titles = new Map((own.data || []).map(x => [x.listing_id, x.title]));
+    if (!ids.length) { box.innerHTML = '<div class="empty"><strong>No claims yet</strong>Create a listing first.</div>'; return; }
+    q = q.in('listing_id', ids);
+    sql = 'SELECT ' + CLAIM_COLS.replace(/,/g, ', ') + '\nFROM food_claims\nWHERE listing_id IN (' + ids.join(', ') + ')\nORDER BY claim_timestamp DESC;';
+  } else {
+    q = q.eq('recipient_id', uid);
+    sql = 'SELECT ' + CLAIM_COLS.replace(/,/g, ', ') + '\nFROM food_claims\nWHERE recipient_id = ' + uid + '\nORDER BY claim_timestamp DESC;';
+  }
+
+  try {
+    const { data, error } = await q;
+    if (error) throw error;
+    const rows = data || [];
+    if (isRecipient() && rows.length) {                   // titles are optional: ignore if RLS hides them
+      const t = await sb.from('food_listings').select('listing_id,title').in('listing_id', rows.map(r => r.listing_id));
+      if (!t.error) titles = new Map((t.data || []).map(x => [x.listing_id, x.title]));
+    }
+    renderClaims(rows, titles);
+    showTrace(sql, { rows, count: rows.length }, 'SELECT successful');
+  } catch (e) { box.textContent = 'Unable to load claims: ' + e.message; failTrace(sql, e); }
+}
+
+function renderClaims(rows, titles) {
+  const box = $('claimsTable');
+  if (!rows.length) { box.innerHTML = '<div class="empty"><strong>No claims found</strong>There are no claim records for this account.</div>'; return; }
+  const body = rows.map(r => {
+    let action = '<span class="micro">—</span>';
+    if (r.claim_status === 'Pending') {
+      action = isDonor()
+        ? '<div class="row-actions"><button class="btn btn-ok btn-small" data-action="approve" data-id="' + r.claim_id + '">Approve</button><button class="btn btn-danger btn-small" data-action="reject" data-id="' + r.claim_id + '">Reject</button></div>'
+        : '<button class="btn btn-danger btn-small" data-action="cancel-claim" data-id="' + r.claim_id + '">Cancel</button>';
+    }
+    return '<tr><td>#' + r.claim_id + '</td><td>#' + r.listing_id + (titles.get(r.listing_id) ? ' · ' + esc(titles.get(r.listing_id)) : '') + '</td>' +
+      (isDonor() ? '<td>#' + r.recipient_id + '</td>' : '') +
+      '<td>' + esc(r.claim_status) + '</td><td>' + esc(fmtDate(r.claim_timestamp)) + '</td><td>' + action + '</td></tr>';
+  }).join('');
+  box.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Claim</th><th>Listing</th>' + (isDonor() ? '<th>Recipient</th>' : '') + '<th>Status</th><th>Time</th><th>Action</th></tr></thead><tbody>' + body + '</tbody></table></div>';
+}
+
+async function reviewClaim(id, decision) {
+  if (!isDonor()) return;
+  const sql = '-- refood_review_claim(' + id + ', ' + sqlStr(decision) + ')\nUPDATE food_claims SET claim_status = ' + sqlStr(decision) + ' WHERE claim_id = ' + id + ';' +
+    (decision === 'Rejected' ? '\nUPDATE food_listings SET status = \'Available\' WHERE listing_id = <claim\'s listing>;' : '');
+  try {
+    const { data, error } = await state.sb.rpc('refood_review_claim', { p_claim_id: id, p_decision: decision });
+    if (error) throw error;
+    await Promise.allSettled([loadClaims(), afterWrite()]);
+    showTrace(sql, data, 'UPDATE successful');
+    notify('Claim #' + id + ' ' + decision.toLowerCase() + '.');
+  } catch (e) { failTrace(sql, e); notify(explain(e), 'error'); }
+}
+
+async function cancelClaim(id) {
+  if (!isRecipient()) return;
+  if (!confirm('Cancel claim #' + id + '? The food becomes available again.')) return;
+  const sql = '-- refood_cancel_claim(' + id + ')\nDELETE FROM food_claims WHERE claim_id = ' + id + ';\nUPDATE food_listings SET status = \'Available\' WHERE listing_id = <claim\'s listing>;';
+  try {
+    const { data, error } = await state.sb.rpc('refood_cancel_claim', { p_claim_id: id });
+    if (error) throw error;
+    await Promise.allSettled([loadClaims(), afterWrite()]);
+    showTrace(sql, { released_listing_id: data }, 'DELETE successful');
+    notify('Claim #' + id + ' cancelled.');
+  } catch (e) { failTrace(sql, e); notify(explain(e), 'error'); }
+}
+
+/* ---------- SELECT + GROUP BY: donor summary ---------- */
+async function loadDonorSummary(withTrace = true) {
+  if (!state.sb || !state.user) return;
+  const sql = 'SELECT u.full_name AS donor, COUNT(f.listing_id) AS listings, SUM(f.quantity_kg) AS total_kg\nFROM food_listings f\nJOIN users u ON f.donor_id = u.user_id\nGROUP BY u.user_id, u.full_name\nORDER BY total_kg DESC;';
+  try {
+    const { data, error } = await state.sb.rpc('refood_donor_summary');
+    if (error) throw error;
+    const rows = data || [];
+    $('donorSummary').innerHTML = rows.length
+      ? '<div class="table-wrap"><table><thead><tr><th>Donor</th><th>Listings</th><th>Total kg</th></tr></thead><tbody>' +
+        rows.slice(0, 8).map(r => '<tr><td>' + esc(r.donor_name) + '</td><td>' + esc(r.listing_count) + '</td><td>' + esc(Number(r.total_kg || 0).toFixed(1)) + '</td></tr>').join('') + '</tbody></table></div>'
+      : 'No donor totals returned.';
+    if (withTrace) showTrace(sql + '\n-- executed by the database function refood_donor_summary()', { rows, count: rows.length }, 'Aggregation successful');
+  } catch (e) { $('donorSummary').textContent = 'Aggregation unavailable: ' + e.message; failTrace(sql, e); }
+}
+
+/* ---------- smart sensors: SELECT, aggregation, INSERT, DELETE ---------- */
+async function loadSensors() {
+  if (!state.sb || !state.user) return;
+  const sql = 'SELECT ' + SENSOR_COLS.replace(/,/g, ', ') + '\nFROM smart_food_sensors\nORDER BY recorded_at DESC\nLIMIT 40;\n\n' +
+    '-- grouped summary, executed by refood_sensor_summary():\nSELECT storage_box_id, ROUND(AVG(temperature_celsius),1) AS avg_temp,\n       MAX(temperature_celsius) AS max_temp, COUNT(*) AS readings\nFROM smart_food_sensors\nGROUP BY storage_box_id\nORDER BY avg_temp DESC;';
+  try {
+    const [readings, summary] = await Promise.all([
+      state.sb.from('smart_food_sensors').select(SENSOR_COLS).order('recorded_at', { ascending: false }).limit(40),
+      state.sb.rpc('refood_sensor_summary')
+    ]);
+    if (readings.error) throw readings.error;
+    if (summary.error) throw summary.error;
+    const rows = readings.data || [], groups = summary.data || [];
+    $('sensorSummary').innerHTML = groups.length
+      ? '<div class="table-wrap"><table><thead><tr><th>Storage box</th><th>Avg °C</th><th>Max °C</th><th>Readings</th></tr></thead><tbody>' +
+        groups.map(x => '<tr><td>' + esc(x.storage_box_id) + '</td><td>' + esc(x.avg_temp) + '</td><td>' + esc(x.max_temp) + '</td><td>' + esc(x.readings) + '</td></tr>').join('') + '</tbody></table></div>'
+      : 'No grouped sensor records found.';
+    $('sensorReadings').innerHTML = rows.length
+      ? rows.slice(0, 12).map(x => {
+          const risk = String(x.spoilage_risk || '').toLowerCase();
+          return '<div class="sensor"><div style="display:flex;justify-content:space-between;gap:8px"><div class="sensor-name">' + esc(x.storage_box_id) + '</div>' +
+            '<span class="pill ' + (risk === 'critical' ? 'danger' : risk === 'high' ? 'warn' : '') + '">' + esc(x.spoilage_risk || 'Unknown') + '</span></div>' +
+            '<div class="sensor-temp">' + esc(x.temperature_celsius) + '°C</div>' +
+            '<div class="sensor-reading">Humidity ' + esc(x.humidity_percent) + '% · ' + esc(fmtDate(x.recorded_at)) + '</div></div>';
+        }).join('')
+      : '<div class="empty">No sensor readings found.</div>';
+    showTrace(sql, { latestReadings: rows, groupedSummary: groups }, 'SELECT + aggregation successful');
+  } catch (e) { $('sensorSummary').textContent = 'Sensor data unavailable: ' + e.message; failTrace(sql, e); }
+}
+
+async function loadTestSensorListings() {
+  const sel = $('testSensorListing');
+  sel.innerHTML = '<option value="">Choose your EXAM TEST listing</option>';
+  if (!isDonor()) return;
+  const { data, error } = await state.sb.from('food_listings').select('listing_id,title').eq('donor_id', state.user.user_id).like('title', CONFIG.demoPrefix + '%');
+  if (error) { notify('Could not load test listings: ' + error.message, 'error'); return; }
+  sel.innerHTML += (data || []).map(x => '<option value="' + Number(x.listing_id) + '">#' + Number(x.listing_id) + ' ' + esc(x.title) + '</option>').join('');
+}
+
+async function addOldTestReading() {
+  if (!isDonor()) return;
+  const id = Number($('testSensorListing').value);
+  if (!id) { notify('Choose your EXAM TEST listing first.', 'error'); return; }
+  const sql = '-- refood_add_old_test_reading(' + id + ')\nINSERT INTO smart_food_sensors (listing_id, storage_box_id, temperature_celsius, humidity_percent, spoilage_risk, recorded_at)\nVALUES (' + id + ", 'EXAM-BOX', 4.0, 60, 'Low', NOW() - INTERVAL '7 hours');";
+  try {
+    const { data, error } = await state.sb.rpc('refood_add_old_test_reading', { p_listing_id: id });
+    if (error) throw error;
+    notify('Old test reading added (sensor #' + data + ').');
+    await loadSensors();                       // reloads the lists, then the trace shows the INSERT result
+    showTrace(sql, { sensor_id: data, recorded_at: 'database time minus 7 hours' }, 'INSERT successful');
+  } catch (e) { failTrace(sql, e); notify('Could not add test reading: ' + e.message, 'error'); }
+}
+
+async function cleanupTestReadings() {
+  if (!isDonor()) return;
+  if (!confirm('Delete old EXAM-BOX readings that belong to your EXAM TEST listings?')) return;
+  const sql = "-- refood_cleanup_test_sensor_readings()\nDELETE FROM smart_food_sensors\nWHERE storage_box_id = 'EXAM-BOX'\n  AND recorded_at < NOW() - INTERVAL '6 hours'\n  AND listing_id IN (<your EXAM TEST listings>);";
+  try {
+    const { data, error } = await state.sb.rpc('refood_cleanup_test_sensor_readings');
+    if (error) throw error;
+    await loadSensors();
+    showTrace(sql, { deleted_test_readings: data }, 'DELETE successful');
+    notify('Deleted ' + data + ' old test reading(s).');
+  } catch (e) { failTrace(sql, e); notify('Test cleanup failed: ' + e.message, 'error'); }
+}
+
+/* ---------- settings ---------- */
+function openSettings() {
+  $('projectUrl').value = store.get('refood_url') || CONFIG.url;
+  $('projectKey').value = store.get('refood_key') || CONFIG.key;
+  $('settingsMessage').innerHTML = '';
+  openModal('settingsModal');
+}
+async function saveSettings() {
+  const url = $('projectUrl').value.trim(), key = $('projectKey').value.trim();
+  if (!url || !key) { notify('Both Project URL and publishable key are required.', 'error', 'settingsMessage'); return; }
+  const parts = key.split('.');
+  const looksLikeServiceKey = /service_role/i.test(key) || (parts.length === 3 && /"role"\s*:\s*"service_role"/.test(atobSafe(parts[1])));
+  if (looksLikeServiceKey) {
+    notify('That looks like a service_role key. Never use it in a browser.', 'error', 'settingsMessage'); return;
+  }
+  store.set('refood_url', url); store.set('refood_key', key);
+  closeModal('settingsModal');
+  await connect();
+}
+function atobSafe(s) { try { return atob(s.replace(/-/g, '+').replace(/_/g, '/')); } catch { return ''; } }
+async function resetSettings() { store.del('refood_url'); store.del('refood_key'); closeModal('settingsModal'); await connect(); }
+
+/* ---------- wiring (event delegation, no inline handlers) ---------- */
+const ACTIONS = {
+  'open-settings': () => openSettings(),
+  'save-settings': () => saveSettings(),
+  'reset-settings': () => resetSettings(),
+  'close-modal': el => closeModal(el.dataset.modal),
+  'sign-out': () => signOut(),
+  'apply-filters': () => loadListings(true),
+  'refresh-donors': () => loadDonorSummary(true),
+  'show-panel': el => showPanel(el.dataset.panel),
+  'open-location': () => openModal('locationModal'),
+  'open-listing': () => openListingModal(),
+  'refresh-claims': () => loadClaims(),
+  'refresh-sensors': () => loadSensors(),
+  'add-test-reading': () => addOldTestReading(),
+  'cleanup-test': () => cleanupTestReadings(),
+  'book': el => bookFood(Number(el.dataset.id)),
+  'mark-reserved': el => updateListing(Number(el.dataset.id), 'Reserved'),
+  'delete-listing': el => deleteListing(Number(el.dataset.id)),
+  'approve': el => reviewClaim(Number(el.dataset.id), 'Approved'),
+  'reject': el => reviewClaim(Number(el.dataset.id), 'Rejected'),
+  'cancel-claim': el => cancelClaim(Number(el.dataset.id))
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (el && ACTIONS[el.dataset.action]) ACTIONS[el.dataset.action](el);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.overlay:not(.hidden)').forEach(o => o.classList.add('hidden'));
+});
+$('authForm').addEventListener('submit', signIn);
+$('listingForm').addEventListener('submit', createListing);
+$('locationForm').addEventListener('submit', createLocation);
+['categoryFilter', 'statusFilter', 'districtFilter'].forEach(id => $(id).addEventListener('change', () => loadListings(true)));
+window.addEventListener('load', connect);
+</script>
+</body>
+</html>
